@@ -4,14 +4,58 @@ const { Product, Category, Tag, ProductTag } = require('../../models');
 // The `/api/products` endpoint
 
 // get all products
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   // find all products
+  try{
+
+    const products = await Product.findAll({
+      attributes: ['id', 'product_name', 'price', 'stock', 'category_id',],
+      include: [
+        {
+          model: Category, 
+          attributes: ['id', 'category_name']
+        }, 
+        {
+          model: Tag,
+          attributes: ['id', 'tag_name']
+        }
+      ]
+    });
+    res.json(products)
+  } catch (e) {
+    res.status(500).json({message: `Server Error:\n ${e}`})
+  }
   // be sure to include its associated Category and Tag data
 });
 
 // get one product
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   // find a single product by its `id`
+  try {
+    const prodById = await Product.findOne({
+      where: {
+        id: req.params.id
+      }, 
+      include: [
+        {
+          model: Category,
+          attributes: ['id', 'category_name']
+        },
+        {
+          model: Tag,
+          attributes: ['id', 'tag_name']
+        }
+      ]
+    });
+    if(!prodById) {
+      res.status(404).json({message: 'No product with this id found!'})
+      return;
+    } else {
+      res.json(prodById)
+    }
+  } catch (e) {
+    res.status(500).json({message: 'Server Error'})
+  }
   // be sure to include its associated Category and Tag data
 });
 
@@ -89,8 +133,23 @@ router.put('/:id', (req, res) => {
     });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   // delete one product by its `id` value
+  try {
+    const destroyProduct = await Product.destroy({
+      where: {
+        id: req.params.id,
+      }
+    })
+    if (!destroyProduct) {
+      res.status(404).json({message: 'No product with this id found!'})
+      return;
+    } else {
+      res.json(destroyProduct)
+    }
+  } catch (e) {
+    res.status(500).json({message: `Server Error: ${e}`})
+  }
 });
 
 module.exports = router;
