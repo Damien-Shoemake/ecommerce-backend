@@ -42,7 +42,7 @@ This is project is meant to build on the concepts of ORM in javascript.
     npm install --save sequelize
 ```
 
--Run this command to install express
+- Run this command to install express
 ```
     npm install express
 ```
